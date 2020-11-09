@@ -1,0 +1,152 @@
+Pong Game Code - Zain Nazar
+
+# Importing Pygame
+import pygame
+
+pygame.init()
+
+# Pong Game window setup
+
+win = pygame.display.set_mode((750, 500))
+
+pygame.display.set_caption('Pong Game')
+
+# Define Colours
+
+white = (255, 255, 255)
+gray  = (128, 128, 128)
+
+# Sprite Classes
+
+class PaddleA(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface([10, 50])
+        self.image.fill(white)
+        self.rect = self.image.get_rect()
+        self.points = 0
+
+class PaddleB(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface([10, 50])
+        self.image.fill(white)
+        self.rect = self.image.get_rect()
+        self.points = 0
+
+class Ball(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface([15, 15])
+        self.image.fill(white)
+        self.rect = self.image.get_rect()
+        self.speed = 15
+        self.dx = 1
+        self.dy = 1
+
+# Sprite Implementation to Game
+
+paddleA = PaddleA()
+paddleA.rect.x = 30
+paddleA.rect.y = 200
+
+paddleB = PaddleB()
+paddleB.rect.x = 710
+paddleB.rect.y = 200
+
+paddle_speed = 15
+
+pong = Ball()
+pong.rect.x = 350
+pong.rect.y = 275
+
+# Group of Sprites
+
+all_sprites = pygame.sprite.Group()
+all_sprites.add(paddleA, paddleB, pong)
+
+# Screen update function
+
+def redraw():
+    # Draw gray screen
+    win.fill(gray)
+
+    # Title font
+    font = pygame.font.SysFont('ALGERIAN', 35)
+    text = font.render('PONG 1v1', False, white)
+    textRect = text.get_rect()
+    textRect.center = (750 // 2, 25)
+    win.blit(text, textRect)
+
+    # Player 1 Score
+    p1_score = font.render(str(paddleA.points), False, white)
+    p1Rect = p1_score.get_rect()
+    p1Rect.center = (50, 50)
+    win.blit(p1_score, p1Rect)
+
+    # Player 2 Score
+    p2_score = font.render(str(paddleB.points), False, white)
+    p2Rect = p2_score.get_rect()
+    p2Rect.center = (700, 50)
+    win.blit(p2_score, p2Rect)
+
+    # Updates all Sprites
+    all_sprites.draw(win)
+
+    # Load updates
+    pygame.display.update()
+
+run = True
+
+# Loop
+while run:
+
+    pygame.time.delay(100)
+
+    # Quit Event
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            run = False
+
+    # Paddle controls 
+    key = pygame.key.get_pressed()
+    if key[pygame.K_e]:
+        paddleA.rect.y += -paddle_speed
+    if key[pygame.K_d]:
+        paddleA.rect.y += paddle_speed
+    if key[pygame.K_UP]:
+        paddleB.rect.y += -paddle_speed
+    if key[pygame.K_DOWN]:
+        paddleB.rect.y += paddle_speed
+
+    # Movement of pong ball
+    pong.rect.y += pong.speed * pong.dy
+    pong.rect.x += pong.speed * pong.dx
+
+    # Wall and Paddle Bounces after Pong ball connection
+    if pong.rect.y > 490:
+        pong.dy = -1
+
+    if pong.rect.y < 1:
+        pong.dy = 1
+
+    if pong.rect.x > 740:
+        pong.rect.x, pong.rect.y = 375, 250
+        pong.dx = -1
+        paddleA.points += 1
+
+    if pong.rect.x < 1:
+        pong.rect.x, pong.rect.y = 375, 250
+        pong.dx = 1
+        paddleB.points += 1
+
+    if paddleA.rect.colliderect(pong.rect):
+        pong.dx = 1
+
+    if paddleB.rect.colliderect(pong.rect):
+        pong.dx = -1
+
+    # Runs redraw function above
+    redraw()
+
+pygame.quit()
